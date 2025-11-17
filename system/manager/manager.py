@@ -8,6 +8,7 @@ import traceback
 
 import cereal.messaging as messaging
 import openpilot.system.sentry as sentry
+from openpilot.common.ignition import get_ignition_state
 from openpilot.common.params import Params, ParamKeyFlag
 from openpilot.common.text_window import TextWindow
 from openpilot.system.hardware import HARDWARE
@@ -18,7 +19,6 @@ from openpilot.system.athena.registration import register, UNREGISTERED_DONGLE_I
 from openpilot.common.swaglog import cloudlog, add_file_handler
 from openpilot.system.version import get_build_metadata, terms_version, training_version
 from openpilot.system.hardware.hw import Paths
-from openpilot.system.hardware.ignition_detection import IgnitionDetection
 
 
 def manager_init() -> None:
@@ -144,7 +144,7 @@ def manager_thread() -> None:
     elif not started and started_prev:
       params.clear_all(ParamKeyFlag.CLEAR_ON_OFFROAD_TRANSITION)
 
-    ignition = IgnitionDetection.get_ignition_state(sm['pandaStates'])
+    ignition = get_ignition_state(sm['pandaStates'])
     if ignition and not ignition_prev:
       params.clear_all(ParamKeyFlag.CLEAR_ON_IGNITION_ON)
 
