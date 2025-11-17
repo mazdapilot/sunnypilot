@@ -232,16 +232,3 @@ class HardwareBase(ABC):
 
   def get_modem_data_usage(self):
     return -1, -1
-
-  @staticmethod
-  def get_ignition_state(panda_states) -> bool:
-    valid_states = [ps for ps in panda_states if ps.pandaType != log.PandaState.PandaType.unknown]
-    if not valid_states:
-      return False
-    if not hasattr(HardwareBase.get_ignition_state, '_seen_can'):
-      HardwareBase.get_ignition_state._seen_can = False
-    # Prioritize CAN-based ignition with fallback to line ignition
-    if any(ps.ignitionCan for ps in valid_states):
-      HardwareBase.get_ignition_state._seen_can = True
-      return True
-    return False if HardwareBase.get_ignition_state._seen_can else any(ps.ignitionLine for ps in valid_states)

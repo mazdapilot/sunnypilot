@@ -21,9 +21,9 @@ from openpilot.system.hardware import HARDWARE, TICI, AGNOS
 from openpilot.system.loggerd.config import get_available_percent
 from openpilot.system.statsd import statlog
 from openpilot.common.swaglog import cloudlog
-from openpilot.system.hardware.base import HardwareBase
 from openpilot.system.hardware.power_monitoring import PowerMonitoring
 from openpilot.system.hardware.fan_controller import TiciFanController
+from openpilot.system.hardware.ignition_detection import IgnitionDetection
 from openpilot.system.version import terms_version, training_version, get_build_metadata
 
 ThermalStatus = log.DeviceState.ThermalStatus
@@ -225,7 +225,7 @@ def hardware_thread(end_event, hw_queue) -> None:
     if sm.updated['pandaStates'] and len(pandaStates) > 0:
 
       # Set ignition based on any panda connected
-      onroad_conditions["ignition"] = HardwareBase.get_ignition_state(pandaStates)
+      onroad_conditions["ignition"] = IgnitionDetection.get_ignition_state(pandaStates)
 
       pandaState = pandaStates[0]
 
