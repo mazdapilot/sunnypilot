@@ -20,6 +20,8 @@ class CarState(CarStateBase, CarStateExt):
     self.crz_btns_counter = 0
     self.acc_active_last = False
     self.lkas_allowed_speed = False
+    self.lkas_request_threshold = 1 ## Minimum request to consider active commanding
+    self.lkas_divergence_threshold = 5 ## Max acceptable difference between request and effective
 
     self.distance_button = 0
 
@@ -73,8 +75,8 @@ class CarState(CarStateBase, CarStateExt):
 
     # Either due to low speed or hands off
     lkas_blocked = cp.vl["STEER_RATE"]["LKAS_BLOCK"] == 1
-    lkas_req = cp.vl["STEER_RATE"]["LKAS_REQUEST"]
-    lkas_eff = cp.vl["STEER_RATE"]["LKAS_EFFECTIVE"]
+    lkas_requested = cp.vl["STEER_RATE"]["LKAS_REQUEST"]
+    lkas_effective = cp.vl["STEER_RATE"]["LKAS_EFFECTIVE"]
 
     if self.CP.minSteerSpeed > 0:
       # LKAS is enabled at 52kph going up and disabled at 45kph going down
@@ -107,12 +109,12 @@ class CarState(CarStateBase, CarStateExt):
     # Check if LKAS is disabled due to lack of driver torque when all other states indicate
     # it should be enabled (steer lockout). Don't warn until we actually get lkas active
     # and lose it again, i.e, after initial lkas activation
-    ## From 19 rlogs: when LKAS_BLOCK=1 and we were requesting nonzero torque, |REQ-EFF| ranged 1–800,
+    ## From 19 rlogs: when LKAS_BLOCK=1 and we were requesting nonzero torque, |REQ-EFF| ranged 1-800,
     ## but when REQ was ~0 the noise floor in LKAS_EFFECTIVE jumped as high as 900. The smallest
     ## observed divergence with a nonzero request was 1–2 counts; using >5 filters the noise yet
     ## still captures every true clamp seen (most were 50–800), without any speed gating.
-    requesting = abs(lkas_req) > 1
-    blocked_output = abs(lkas_req - lkas_eff) > 5
+    requesting = abs(lkas_requested) > self.lkas_request_threshold
+    blocked_output = abs(lkas_requested - lkas_effective) > self.lkas_divergence_threshold
     if self.CP.carFingerprint in (CAR.MAZDA_CX5_2022, CAR.MAZDA_CX9_2021):
       ret.steerFaultTemporary = self.lkas_allowed_speed and lkas_blocked and requesting and blocked_output
     else:
