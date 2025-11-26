@@ -21,7 +21,7 @@ class CarState(CarStateBase, CarStateExt):
     self.acc_active_last = False
     self.lkas_allowed_speed = False
     self.lkas_request_threshold = 1 ## Minimum request to consider active commanding
-    self.lkas_divergence_threshold = 5 ## Max acceptable difference between request and effective
+    self.lkas_divergence_threshold = 20 ## Max acceptable difference between request and effective
 
     self.distance_button = 0
 
